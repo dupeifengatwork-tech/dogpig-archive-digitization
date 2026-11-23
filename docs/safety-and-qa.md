@@ -28,6 +28,19 @@ A first QA pass on one series' import sheet (about 1,300 records, 89 columns) fo
 
 Every finding records the cell, the original value, the reason and a suggested fix. The script never edits the sheet.
 
+A full pass on 30 October 2026 checked the same sheet against the mapping specification: 1,314 records in 89 columns, 79 defined by the specification and 10 extra. It ran 17 rules and returned 518 findings (187 high, 38 medium, 293 low severity). Severity describes the consequence of an error; a separate status describes the evidence:
+
+| Status | Findings |
+|---|---:|
+| Confirmed: does not match the specification | 205 |
+| Confirmed: contradicted by other cells in the same sheet | 194 |
+| Needs review: name or translation | 59 |
+| Draft rule differs from the source; check the original | 35 |
+| Needs an outside source (names, paths) | 13 |
+| Other items awaiting review or import confirmation | 12 |
+
+The checking script compared the workbook with a saved extraction and stopped if anything had changed, and recorded the SHA-256 of both the workbook and the specification. It is tied to that one workbook, so it is not published here; Stage 8 will generalise it.
+
 ## Publishing this repository
 
 Nothing in this repository can be used to reconstruct the archive's file structure. Before each push:

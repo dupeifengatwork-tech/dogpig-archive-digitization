@@ -37,83 +37,97 @@ digiKam 重複照片智能檢查清單產生器
 === 事前準備 ===
 pip3 install --break-system-packages pillow imagehash openpyxl
 
-=== 分組方式（四選一，優先順序建議見下方「操作步驟」）===
-遇到「digiKam 抓的相似組不準」（拆組、漏抓、同組內重複列出同一檔）時，
-不用等我改感知雜湊演算法——直接換一種分組輸入來源即可，四種可以混用：
+=== 分組方式：預設「全部自動一起跑」，另外可疊加人眼確認過的結果 ===
+（2026-09-23 改版：以前四種分組方式互斥、只能挑一種下指令，這是常見的
+誤用來源——常常忘記另外再跑一次雜湊分組，導致 Excel 裡只有檔名家族分組
+的結果。現在改成：只要沒特別關掉，下面 1)、2) 兩種自動分組每次都會一起
+跑、結果自動合併去重，不用再分好幾次下指令。）
 
-  1) --family      不算相似度，純粹用「同資料夾 + 檔名核心編號」分組。
-                    最快、最準，但只對「檔名本來就有規律」的情況有效
-                    （例如 034.JPG / 034(高斯效果).jpg 這種）。
-  2) --groups-csv   吃外部已經分好的組（group_id,file_path 兩欄），
+自動一起跑的兩種（預設一定會跑）：
+  1) 檔名家族分組   同資料夾 + 檔名核心編號相同（例如 034.JPG /
+                    034(高斯效果).jpg 這種），最快、最準，但只在檔名本來
+                    就有規律時才抓得到。
+  2) 內建感知雜湊分組  對所有圖片兩兩比對雜湊距離，分成「100%完全相同」
+                    跟「50-90%近似」兩種標籤（用 --exact-max-dist /
+                    --similar-max-dist 調整門檻）。注意：對「顏色/色調被
+                    大幅調過」或「轉黑白」的版本辨識力很弱，這種情況
+                    digiKam 自己的演算法也會漏，需要用下面的人工輸入補。
+  想跳過雜湊比對（例如資料夾圖片數量很多、只想先看檔名家族分組結果）可以
+  加 --skip-hash。內建雜湊分組預設只在「同一個資料夾內」兩兩比對（活動辦
+  在不同資料夾，重複照片幾乎不會跨資料夾出現，這樣能大幅減少比對量、避免
+  資料夾/圖片數量一多就跑很久）；真的需要跨資料夾找重複時可以加
+  --cross-folder 改成整批全部兩兩比對，但要有心理準備會明顯變慢。
+
+可疊加的人工輸入（來自 digiKam 肉眼複查後手動整理，選配、可與上面同時給）：
+  3) --groups-csv   吃外部已經分好的組（group_id,file_path 兩欄），
                     例如你在 digiKam 畫面上人眼看出來該歸成一組、
                     但 digiKam 自己沒抓對時，手動整理成 CSV 餵給程式。
                     同一組內重複列出的路徑會自動去重。
-  3) --pairs-csv    吃「兩兩很像」的配對清單（file_a,file_b 兩欄），
+  4) --pairs-csv    吃「兩兩很像」的配對清單（file_a,file_b 兩欄），
                     程式會自動用 Union-Find 把有遞移關係的配對合併成同一組。
                     這是專門解決 digiKam 把同一批檔案拆成好幾組顯示的問題：
                     妳不用自己先想「這些總共該分成幾組」，看到哪兩張像
                     就記一行，程式會自己接起來。
-  4) 都不給         退回程式內建的感知雜湊分組（--tier exact/similar）。
-                    注意：感知雜湊對「顏色/色調被大幅調過」或「轉黑白」的
-                    版本辨識力很弱（同一張照片、色調差很多時，雜湊距離可能
-                    比兩張本來就不同的照片還遠），這種情況 digiKam 自己的
-                    演算法也會漏，建議直接用 1)~3) 其中一種。
 
-四種同時只會用其中一種：優先順序是 --pairs-csv > --groups-csv > --family
-> 內建雜湊分組。
+所有來源（檔名家族＋雜湊＋groups-csv＋pairs-csv）會合併進同一個 Union-Find：
+同一張照片不管被哪幾種方式抓到都只會在 Excel 出現一次，「相似度分級」欄
+會列出這組是被哪些方式抓到的（例如「檔名家族分組、100%（完全相同）」）。
 
 === 操作步驟（建議順序）===
-1. 先跑 --family（最快、不需要 digiKam、不需要跑相似度搜尋），把「同資料夾
-   +檔名有規律」的版本一次抓齊：
-   python3 digikam_smart_review.py "資料夾路徑" --output 查重清單.xlsx --family
+1. 直接跑（不用加任何分組參數），檔名家族分組＋內建雜湊分組會自動一起跑，
+   一次產生 Excel：
+   python3 digikam_smart_review.py "資料夾路徑" --output 查重清單.xlsx
 
 2. 再跑 digiKam 內建的相似度搜尋（100-100% → 80-90% → 50-80%），把畫面上
-   看到的參考組人眼複查一次；如果 digiKam 拆組或漏抓（這是已知的常見狀況），
-   把妳看出來該歸成一組的檔案整理成 --pairs-csv（兩兩配對即可，不用想
-   要分幾組）或 --groups-csv（已經分好組的話），再跑一次：
+   看到的參考組人眼複查一次；如果 digiKam 抓到、但上面 Excel 沒有的組
+   （通常是檔名沒規律、色調被大幅調整、或彩轉黑白的版本——這是內建雜湊
+   分組已知辨識力較弱的地方），把妳看出來該歸成一組的檔案整理成
+   --pairs-csv（兩兩配對即可，不用想要分幾組）或 --groups-csv（已經分好
+   組的話），再跑一次：
    python3 digikam_smart_review.py "資料夾路徑" --output 查重清單.xlsx --pairs-csv 配對.csv
+   （這次還是會照常自動跑檔名家族分組＋內建雜湊分組，--pairs-csv 是疊加
+   進去的額外來源，不是取代。）
 
-3. 剩下沒被 1)、2) 涵蓋到、檔名又沒規律的，可以用內建雜湊分組補一次
-   （--tier exact 再 --tier similar），當作最後一道網，但要有心理準備
-   這一層對色調大改/黑白版的辨識力最弱。
-
-4. 每次都輸出到「同一個」--output 路徑，程式會用檔案路徑合併新舊結果，
+3. 每次都輸出到「同一個」--output 路徑，程式會用檔案路徑合併新舊結果，
    已經在 Excel 標過「已確認/已刪除」的列不會被洗掉，只有新出現的檔案
-   會是「尚未確認」，所以四個步驟的順序可以照實際狀況調整、也可以只做
-   其中幾步。
+   會是「尚未確認」。
 
-5. 打開 Excel，只需要專心看「建議動作＝待複核」的列（其餘 保留/刪除/
+4. 打開 Excel，只需要專心看「建議動作＝待複核」的列（其餘 保留/刪除/
    連拍不建議刪除/兩者都保留 是程式判斷完的建議，仍建議抽查但不必逐列看）。
 
-6.（可選）加 --write-labels，把建議動作同步寫成 digiKam 的色彩標籤／
+5.（可選）加 --write-labels，把建議動作同步寫成 digiKam 的色彩標籤／
    揀選標籤（XMP），這樣就能直接在 digiKam 縮圖畫面用篩選器看建議結果，
    不用切去看 Excel。細節見下方「digiKam 標籤整合」段落。
 
 參數：
   folder                要掃描的資料夾（自動遞迴掃描子資料夾）
   --output               輸出的 Excel 路徑；若已存在會合併狀態欄，不覆蓋
-  --tier                 exact（相當於 digiKam 100%）或 similar（相當於 50-90%）
+  --skip-hash             跳過內建感知雜湊分組，只做檔名家族分組（＋人工輸入，
+                          如果有給的話）；圖片數量非常多、雜湊兩兩比對太慢
+                          時可以用這個先出一版結果
   --hash-size            感知雜湊精細度，預設 16（越大越精細，速度略慢）
-  --exact-max-dist       exact 分級的雜湊距離上限，預設 3
-  --similar-max-dist     similar 分級的雜湊距離上限，預設 14
+  --exact-max-dist       「100%完全相同」分級的雜湊距離上限，預設 3
+  --similar-max-dist     「50-90%近似」分級的雜湊距離上限，預設 14
   --burst-seconds        判定為連續拍攝的拍攝時間差，預設 10 秒
   --grayscale-sat        判定為黑白的平均飽和度上限（0-255），預設 18
   --near-tie-pct          解析度/檔案大小差距在這個百分比以內視為打平、
                           轉人工複核，避免 0.6% 這種雜訊等級差距就自動選邊，
                           預設 3.0
   --no-thumbnails        不嵌入縮圖（檔案很多、想加快產生速度時使用）
-  --groups-csv            用外部分組結果（group_id,file_path）取代內建分組
-  --pairs-csv             用外部兩兩配對清單（file_a,file_b），自動 Union-Find
-                          合併成組，解決 digiKam 拆組問題
-  --family                用「同資料夾+檔名核心編號」分組，不需要相似度搜尋
+  --groups-csv            疊加外部分組結果（group_id,file_path），跟自動
+                          分組的結果合併，不是取代
+  --pairs-csv             疊加外部兩兩配對清單（file_a,file_b），自動
+                          Union-Find 合併成組，跟自動分組的結果合併
   --write-labels          把本次建議動作寫成 digiKam 色彩/揀選標籤（XMP），
                           需要系統已安裝 exiftool（brew install exiftool）
+  --family, --tier        舊版參數，保留相容但已不需要使用：檔名家族分組
+                          跟內建雜湊分組現在預設就會一起跑，不用再另外指定
 
 === 這份腳本「準」在哪裡、可能「漏」在哪裡 ===
 準確度來源（可信度由高到低）：
   - --pairs-csv / --groups-csv：完全來自妳人眼確認的分組，程式只負責套用
     決策規則跟合併去重，分組本身的正確性 100% 取決於妳給的資料，不是程式判斷的。
-  - --family：純文字規則（去括號、去空白、去「拷貝/副本/copy」字樣），
+  - 檔名家族分組：純文字規則（去括號、去空白、去「拷貝/副本/copy」字樣），
     不看圖片內容，所以不會誤判「長得像但其實不同」的照片，但也只在
     檔名真的有規律時才抓得到，抓不到不會報錯，只是那組不會出現在清單裡。
   - 原始檔訊號分數（EXIF Software／修改時間＝拍攝時間／檔名無編修字樣）：
@@ -136,9 +150,10 @@ pip3 install --break-system-packages pillow imagehash openpyxl
   - 「建議動作＝待複核」的所有列（所有比較層都打平，或缺 EXIF 又解析度/
     檔案大小都很接近）。
   - 檔名只有純數字尾碼（01/02/03，沒有拷貝/副本/copy 這類字樣）：刻意
-    不會被 --family 自動合併，因為這種編號有時代表真的不同張照片（例如
-    海報01/02 案例），有時又是同一張的不同檔（例如烏克麗麗01/02/03 案例），
-    無法只憑檔名規則安全判斷，需要人眼看內容決定要不要用 --pairs-csv 手動歸組。
+    不會被檔名家族分組自動合併，因為這種編號有時代表真的不同張照片
+    （例如海報01/02 案例），有時又是同一張的不同檔（例如烏克麗麗01/02/03
+    案例），無法只憑檔名規則安全判斷，需要人眼看內容決定要不要用
+    --pairs-csv 手動歸組。
   - 顏色/色調被大幅調整、或彩轉黑白的版本：內建雜湊分組可能連不起來，
     需要人眼發現後用 --pairs-csv 或 --groups-csv 補進去。
   - EXIF 完全被清除的圖片（網路下載、截圖、社群平台重新編碼過的檔）：
@@ -191,7 +206,7 @@ API，第一次使用建議先驗證一次：在 digiKam 裡手動把一張測�
 同拍攝時間不算連拍、EXIF 全無時的近似容忍度、完全打平轉人工複核、
 兩種檔名家族分組、刻意不合併純數字尾碼、pairs-csv 跨組合併、
 groups-csv 重複列去重、檔名多資訊兩者都保留、EXIF 讀取正確性、
-建議動作 → digiKam 標籤的對照表）。
+建議動作 → digiKam 標籤的對照表、多種分組來源合併去重不重複列出）。
 之後如果改規則、調參數，跑一次這個測試檔案可以立刻知道有沒有改壞
 既有邏輯：
   python3 test_digikam_smart_review.py
@@ -206,6 +221,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from collections import defaultdict
 from datetime import datetime
 
@@ -229,6 +245,12 @@ except ImportError:
 
 
 IMAGE_EXTS = (".jpg", ".jpeg", ".png", ".tif", ".tiff", ".bmp", ".webp")
+
+TIER_LABEL_FAMILY = "檔名家族分組"
+TIER_LABEL_EXACT = "100%（完全相同）"
+TIER_LABEL_SIMILAR = "50-90%（近似）"
+TIER_LABEL_GROUPS_CSV = "外部分組（digiKam 匯出）"
+TIER_LABEL_PAIRS_CSV = "外部配對（digiKam 匯出）"
 
 # 檔名中常見的「編修痕跡」字樣（出現這些字樣不算是檔名資訊變豐富，只是編修標記）
 EDIT_MARKERS = [
@@ -448,7 +470,7 @@ def extract_feature(filepath, hash_size):
 
 
 # ---------------------------------------------------------------------------
-# 第二步：用感知雜湊分組（Union-Find）
+# 第二步：分組（多種來源，用 Union-Find 合併成最終組別）
 # ---------------------------------------------------------------------------
 
 class UnionFind:
@@ -468,7 +490,7 @@ class UnionFind:
 
 
 def group_by_csv(features, csv_path):
-    """從外部 CSV 讀取分組（欄位：group_id,file_path），優先於內建的感知雜湊分組。
+    """從外部 CSV 讀取分組（欄位：group_id,file_path）。
 
     用途：如果妳已經有從 digiKam 資料庫（或 digiKam 的「尋找重複項」搜尋結果）
     匯出的分組清單，直接用那份分組結果最準確——本程式自己算的感知雜湊
@@ -531,7 +553,7 @@ def normalize_family_key(path):
     「惠笙20100307表演-海報01.jpg」跟「...-海報02.jpg」這種只有尾碼數字不同、
     沒有複製語意字樣的檔名，這個函式刻意不會把它們判成同一組——01/02 常常是
     真的不同兩張（例如兩頁海報、兩個版本設計），要靠視覺相似度而不是檔名去
-    判斷，交給 --family 以外的分組方式（digiKam 分組 CSV 或內建雜湊）處理。
+    判斷，交給檔名家族分組以外的分組方式（digiKam 分組 CSV 或內建雜湊）處理。
     """
     parent = os.path.basename(os.path.dirname(path))
     stem = os.path.splitext(os.path.basename(path))[0]
@@ -605,6 +627,7 @@ def group_by_pairs_csv(features, csv_path):
 
 
 def group_by_hash(features, max_dist):
+    """單一距離門檻的內建感知雜湊分組（提供給測試/獨立使用）。"""
     valid = [f for f in features if f.get("phash") is not None]
     uf = UnionFind([f["path"] for f in valid])
     n = len(valid)
@@ -619,6 +642,137 @@ def group_by_hash(features, max_dist):
         groups[uf.find(f["path"])].append(f)
 
     return [g for g in groups.values() if len(g) > 1]
+
+
+# ---------------------------------------------------------------------------
+# 多來源合併：把「檔名家族／內建雜湊／groups-csv／pairs-csv」的分組結果
+# 全部倒進同一個 Union-Find，同一張照片不管被幾種方式抓到都只算一次。
+# ---------------------------------------------------------------------------
+
+def build_family_edges(features):
+    """把檔名家族分組轉成邊清單：組內全部連到第一個成員（星狀連法），
+    足夠讓 Union-Find 把整組連通，不需要兩兩全連。"""
+    edges = []
+    for group in group_by_filename_family(features):
+        anchor = group[0]["path"]
+        for f in group[1:]:
+            edges.append((anchor, f["path"], TIER_LABEL_FAMILY))
+    return edges
+
+
+def build_hash_edges(features, exact_max_dist, similar_max_dist, cross_folder=False):
+    """計算圖片兩兩之間的雜湊距離，依距離分成「完全相同」跟「近似」兩種標籤
+    的邊（只算一次距離，不用像以前一樣為兩個 tier 各跑一次 O(n²)）。
+
+    預設只在「同一個資料夾內」兩兩比對（cross_folder=False）：豆皮的檔案庫
+    是按活動分資料夾（一個講座/派對一個資料夾），實務上重複照片幾乎都出現
+    在同一場活動的資料夾裡，不會跨兩個不相干的活動誤判成重複。這樣可以把
+    比對量從「整批全部兩兩比對」（例如 2000 張圖片 ≈ 200 萬組比對）降到
+    「各資料夾內部比對後加總」（例如 100 個資料夾、每個 20 張 ≈ 2 萬組），
+    對這種資料夾數量多、單一資料夾內圖片數量少的檔案庫是關鍵的效能改善——
+    不這樣做的話，一個資料夾有兩千張圖片的規模，兩兩比對可能要跑好幾分鐘
+    甚至更久。真的需要跨資料夾找重複（例如懷疑同一張照片被放進兩個不同
+    活動的資料夾）時，用 --cross-folder 開啟全域比對，但資料夾/圖片數量多
+    時要有心理準備會跑比較久。
+    """
+    valid = [f for f in features if f.get("phash") is not None]
+    edges = []
+
+    if cross_folder:
+        buckets = {None: valid}
+    else:
+        buckets = defaultdict(list)
+        for f in valid:
+            buckets[os.path.dirname(f["path"])].append(f)
+
+    for bucket in buckets.values():
+        n = len(bucket)
+        for i in range(n):
+            for j in range(i + 1, n):
+                dist = bucket[i]["phash"] - bucket[j]["phash"]
+                if dist <= exact_max_dist:
+                    edges.append((bucket[i]["path"], bucket[j]["path"], TIER_LABEL_EXACT))
+                elif dist <= similar_max_dist:
+                    edges.append((bucket[i]["path"], bucket[j]["path"], TIER_LABEL_SIMILAR))
+    return edges
+
+
+def build_groups_csv_edges(features, csv_path):
+    edges = []
+    for group in group_by_csv(features, csv_path):
+        anchor = group[0]["path"]
+        for f in group[1:]:
+            edges.append((anchor, f["path"], TIER_LABEL_GROUPS_CSV))
+    return edges
+
+
+def build_pairs_csv_edges(features, csv_path):
+    """跟 group_by_pairs_csv 讀同一份 CSV，但直接回傳每一行原始配對當一條邊
+    （不用先跑一次 Union-Find 再攤平成星狀邊，比較單純）。"""
+    import csv as csv_module
+    by_path = {f["path"] for f in features}
+    edges = []
+    with open(csv_path, encoding="utf-8-sig", newline="") as fh:
+        reader = csv_module.DictReader(fh)
+        for row in reader:
+            a, b = row["file_a"].strip(), row["file_b"].strip()
+            if a in by_path and b in by_path:
+                edges.append((a, b, TIER_LABEL_PAIRS_CSV))
+            else:
+                for p in (a, b):
+                    if p not in by_path:
+                        print(f"  ⚠️ 配對 CSV 裡的路徑掃描時沒找到，略過：{p}")
+    return edges
+
+
+def combine_all_groups(features, skip_hash=False, exact_max_dist=3,
+                        similar_max_dist=14, groups_csv=None, pairs_csv=None,
+                        cross_folder=False):
+    """把所有分組來源合併成最終組別清單，回傳 [(members, tier_label), ...]。
+
+    tier_label 是這一組「被哪些方式抓到」的組合說明（例如「檔名家族分組、
+    100%（完全相同）」），用逗號／頓號分隔多個來源，方便在 Excel 裡一眼
+    看出這組重複是靠什麼判斷出來的。同一張照片不管被幾種方式抓到，最終
+    只會出現在一組、一列，不會因為同時符合檔名規則又符合雜湊距離而重複
+    列出兩次——這是先前「四選一」設計改成「自動全部一起跑」後特別要處理
+    的重點，避免同一批照片被家族分組跟雜湊分組各自抓一次、在 Excel 裡
+    出現兩份幾乎一樣的列。
+    """
+    all_paths = [f["path"] for f in features]
+    uf = UnionFind(all_paths)
+    contributing_labels = defaultdict(set)  # path -> 這個檔案被哪些來源連過
+
+    def apply_edges(edges):
+        for a, b, label in edges:
+            uf.union(a, b)
+            contributing_labels[a].add(label)
+            contributing_labels[b].add(label)
+
+    apply_edges(build_family_edges(features))
+    if not skip_hash:
+        apply_edges(build_hash_edges(features, exact_max_dist, similar_max_dist,
+                                      cross_folder=cross_folder))
+    if groups_csv:
+        apply_edges(build_groups_csv_edges(features, groups_csv))
+    if pairs_csv:
+        apply_edges(build_pairs_csv_edges(features, pairs_csv))
+
+    by_path = {f["path"]: f for f in features}
+    members_by_root = defaultdict(list)
+    labels_by_root = defaultdict(set)
+    for p in all_paths:
+        root = uf.find(p)
+        members_by_root[root].append(by_path[p])
+        labels_by_root[root] |= contributing_labels.get(p, set())
+
+    result = []
+    for root, members in members_by_root.items():
+        if len(members) < 2:
+            continue
+        labels = labels_by_root[root]
+        tier_label = "、".join(sorted(labels)) if labels else "未知來源"
+        result.append((members, tier_label))
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -846,12 +1000,21 @@ def load_existing_status(output_path):
         return {}
 
 
-def build_thumbnail(path, max_dim=120):
-    thumb_path = path + ".__thumb__.jpg"
+def build_thumbnail(path, tmp_dir, max_dim=120):
+    """把縮圖存到「獨立的暫存資料夾」（tmp_dir），絕對不寫進原始照片所在的
+    資料夾——早期版本曾經把縮圖存成 <原始檔名>.__thumb__.jpg、跟原始照片放
+    在同一個資料夾，一旦程式中途被中斷（例如逾時被強制關閉），縮圖檔案就
+    會留在妳的豆皮檔案庫裡當垃圾，甚至可能在下次掃描時被誤判成一張新照片
+    （2026-09-23 實測案例：v11 資料夾因為逾時中斷，留下 86 個這種殘留檔）。
+    改成寫進呼叫端用 tempfile.mkdtemp() 建立的獨立暫存資料夾後，就算程式
+    中途被砍掉，殘留的也只會是系統暫存目錄裡的檔案，不會混進妳的原始檔案
+    庫；呼叫端在整批處理完（不管成功或失敗）都要用 shutil.rmtree 清掉這個
+    暫存資料夾。"""
     try:
         with Image.open(path) as im:
             im = im.convert("RGB")
             im.thumbnail((max_dim, max_dim))
+            thumb_path = os.path.join(tmp_dir, f"{hashlib.md5(path.encode('utf-8')).hexdigest()}.jpg")
             im.save(thumb_path, "JPEG", quality=70)
         return thumb_path
     except Exception:
@@ -885,77 +1048,81 @@ def write_excel(output_path, rows, with_thumbnails=True):
     )
     ws.add_data_validation(dv)
 
-    r = 2
-    thumb_paths_to_cleanup = []
-    for row in rows:
-        ws.cell(row=r, column=2, value=row["group_id"])
-        ws.cell(row=r, column=3, value=row["tier_label"])
-        ws.cell(row=r, column=4, value=row["filename"])
-        ws.cell(row=r, column=5, value=row["path"])
-        ws.cell(row=r, column=6, value=f'{row["width"]}x{row["height"]}')
-        ws.cell(row=r, column=7, value=round(row["size_bytes"] / 1024, 1))
-        ws.cell(row=r, column=8, value=round(bytes_per_pixel(row), 3)
-                 if row["width"] and row["height"] else "")
-        ws.cell(row=r, column=9, value=row["dt_original"].strftime("%Y-%m-%d %H:%M:%S")
-                 if row["dt_original"] else "")
-        ws.cell(row=r, column=10, value=row["dt_modified"].strftime("%Y-%m-%d %H:%M:%S")
-                 if row["dt_modified"] else "")
-        ws.cell(row=r, column=11, value=round(row["saturation"], 1)
-                 if row["saturation"] is not None else "")
-        ws.cell(row=r, column=12, value=original_signal_score(row))
-        action_cell = ws.cell(row=r, column=13, value=row["action"])
-        ws.cell(row=r, column=14, value=row["reason"])
-        status_cell = ws.cell(row=r, column=15, value=row["status"])
-        dv.add(status_cell)
+    # 縮圖一律寫進系統暫存資料夾（tempfile.mkdtemp()），絕對不寫進原始照片
+    # 所在的資料夾——用 try/finally 確保不管中間有沒有出錯（包含程式被強制
+    # 中斷），這個暫存資料夾最後都會被整個刪掉，不會在妳的檔案庫裡留下任何
+    # 殘留檔案。早期版本把縮圖存成 <原始檔名>.__thumb__.jpg、跟原始照片放
+    # 在同一個資料夾，一旦程式中途被中斷（例如逾時被強制關閉）就會留下垃圾
+    # 檔案，甚至可能在下次掃描時被誤判成一張新照片（2026-09-23 實測案例：
+    # v11 資料夾因為逾時中斷，留下 86 個這種殘留檔）。
+    thumb_tmp_dir = tempfile.mkdtemp(prefix="digikam_review_thumbs_") if with_thumbnails else None
+    try:
+        r = 2
+        for row in rows:
+            ws.cell(row=r, column=2, value=row["group_id"])
+            ws.cell(row=r, column=3, value=row["tier_label"])
+            ws.cell(row=r, column=4, value=row["filename"])
+            ws.cell(row=r, column=5, value=row["path"])
+            ws.cell(row=r, column=6, value=f'{row["width"]}x{row["height"]}')
+            ws.cell(row=r, column=7, value=round(row["size_bytes"] / 1024, 1))
+            ws.cell(row=r, column=8, value=round(bytes_per_pixel(row), 3)
+                     if row["width"] and row["height"] else "")
+            ws.cell(row=r, column=9, value=row["dt_original"].strftime("%Y-%m-%d %H:%M:%S")
+                     if row["dt_original"] else "")
+            ws.cell(row=r, column=10, value=row["dt_modified"].strftime("%Y-%m-%d %H:%M:%S")
+                     if row["dt_modified"] else "")
+            ws.cell(row=r, column=11, value=round(row["saturation"], 1)
+                     if row["saturation"] is not None else "")
+            ws.cell(row=r, column=12, value=original_signal_score(row))
+            action_cell = ws.cell(row=r, column=13, value=row["action"])
+            ws.cell(row=r, column=14, value=row["reason"])
+            status_cell = ws.cell(row=r, column=15, value=row["status"])
+            dv.add(status_cell)
 
-        fill_hex = ACTION_FILL.get(row["action"])
-        if fill_hex:
-            action_cell.fill = PatternFill("solid", fgColor=fill_hex)
-        status_fill = STATUS_OK_COLORS.get(row["status"], "FFFFFF")
-        status_cell.fill = PatternFill("solid", fgColor=status_fill)
+            fill_hex = ACTION_FILL.get(row["action"])
+            if fill_hex:
+                action_cell.fill = PatternFill("solid", fgColor=fill_hex)
+            status_fill = STATUS_OK_COLORS.get(row["status"], "FFFFFF")
+            status_cell.fill = PatternFill("solid", fgColor=status_fill)
 
-        if with_thumbnails:
-            thumb = build_thumbnail(row["path"])
-            if thumb:
-                thumb_paths_to_cleanup.append(thumb)
-                try:
-                    img = XLImage(thumb)
-                    img.width, img.height = 90, 68
-                    ws.add_image(img, f"A{r}")
-                    ws.row_dimensions[r].height = 54
-                except Exception:
-                    pass
-        r += 1
+            if with_thumbnails:
+                thumb = build_thumbnail(row["path"], thumb_tmp_dir)
+                if thumb:
+                    try:
+                        img = XLImage(thumb)
+                        img.width, img.height = 90, 68
+                        ws.add_image(img, f"A{r}")
+                        ws.row_dimensions[r].height = 54
+                    except Exception:
+                        pass
+            r += 1
 
-    ws.freeze_panes = "B2"
+        ws.freeze_panes = "B2"
 
-    # 摘要頁
-    summary = wb.create_sheet("摘要", 0)
-    total_groups = len({row["group_id"] for row in rows})
-    total_files = len(rows)
-    action_counts = defaultdict(int)
-    for row in rows:
-        action_counts[row["action"]] += 1
-    unconfirmed = sum(1 for row in rows if row["status"] == STATUS_UNCONFIRMED)
+        # 摘要頁
+        summary = wb.create_sheet("摘要", 0)
+        total_groups = len({row["group_id"] for row in rows})
+        total_files = len(rows)
+        action_counts = defaultdict(int)
+        for row in rows:
+            action_counts[row["action"]] += 1
+        unconfirmed = sum(1 for row in rows if row["status"] == STATUS_UNCONFIRMED)
 
-    summary.append(["產生時間", datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
-    summary.append(["組數", total_groups])
-    summary.append(["涉及檔案數", total_files])
-    summary.append(["尚未確認的檔案數", unconfirmed])
-    summary.append([])
-    summary.append(["建議動作", "檔案數"])
-    for action, count in action_counts.items():
-        summary.append([action, count])
-    for col, w in zip("AB", (22, 40)):
-        summary.column_dimensions[col].width = w
+        summary.append(["產生時間", datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
+        summary.append(["組數", total_groups])
+        summary.append(["涉及檔案數", total_files])
+        summary.append(["尚未確認的檔案數", unconfirmed])
+        summary.append([])
+        summary.append(["建議動作", "檔案數"])
+        for action, count in action_counts.items():
+            summary.append([action, count])
+        for col, w in zip("AB", (22, 40)):
+            summary.column_dimensions[col].width = w
 
-    wb.save(output_path)
-
-    for t in thumb_paths_to_cleanup:
-        try:
-            os.remove(t)
-        except OSError:
-            pass
+        wb.save(output_path)
+    finally:
+        if thumb_tmp_dir:
+            shutil.rmtree(thumb_tmp_dir, ignore_errors=True)
 
 
 # ---------------------------------------------------------------------------
@@ -966,8 +1133,14 @@ def main():
     parser = argparse.ArgumentParser(description="digiKam 重複照片智能檢查清單產生器")
     parser.add_argument("folder", help="要掃描的資料夾（含子資料夾）")
     parser.add_argument("--output", required=True, help="輸出/合併的 Excel 路徑")
-    parser.add_argument("--tier", choices=["exact", "similar"], default="exact",
-                        help="exact ≈ digiKam 100%%；similar ≈ digiKam 50-90%%")
+    parser.add_argument("--skip-hash", action="store_true",
+                        help="跳過內建感知雜湊分組，只做檔名家族分組（＋人工輸入，"
+                             "如果有給的話）；圖片數量非常多、雜湊兩兩比對太慢時使用")
+    parser.add_argument("--cross-folder", action="store_true",
+                        help="內建雜湊分組預設只在同一個資料夾內兩兩比對（活動辦在"
+                             "不同資料夾，重複照片幾乎不會跨資料夾出現，這樣可以大幅"
+                             "減少比對量）；加這個參數改成整批資料夾全部兩兩比對，"
+                             "圖片數量多時會明顯變慢")
     parser.add_argument("--hash-size", type=int, default=16)
     parser.add_argument("--exact-max-dist", type=int, default=3)
     parser.add_argument("--similar-max-dist", type=int, default=14)
@@ -978,24 +1151,29 @@ def main():
                              "（避免因為 0.6%% 這種雜訊等級的差距就自動選邊），預設 3.0")
     parser.add_argument("--no-thumbnails", action="store_true")
     parser.add_argument("--groups-csv", default=None,
-                        help="用外部分組結果（欄位 group_id,file_path）取代內建的感知雜湊分組，"
-                             "例如從 digiKam 資料庫匯出的重複組清單；建議「編修版」類的組用這個")
+                        help="疊加外部分組結果（欄位 group_id,file_path），例如從 digiKam "
+                             "資料庫匯出的重複組清單；跟自動分組（檔名家族＋內建雜湊）的"
+                             "結果合併，不是取代")
     parser.add_argument("--pairs-csv", default=None,
-                        help="用外部「兩兩配對」清單（欄位 file_a,file_b）取代內建分組，程式會自動"
-                             "用 Union-Find 把有遞移關係的配對合併成同一組——專門解決 digiKam 自己"
-                             "把同一批重複檔案拆成好幾個參考組顯示的問題，把畫面上看到的每一對"
-                             "「這兩個很像」記一行就好，不用自己先判斷該分成幾組")
-    parser.add_argument("--family", action="store_true",
-                        help="改用「同資料夾+檔名核心編號相同」分組（例如 034.JPG / "
-                             "034(高斯效果).jpg / 034(高斯效果再處理).jpg 會被視為同組），"
-                             "不需要 digiKam、不需要跑相似度搜尋，一次就能把被拆到不同"
-                             "相似度區間的同一張照片各版本抓回同一組")
+                        help="疊加外部「兩兩配對」清單（欄位 file_a,file_b），程式會自動"
+                             "用 Union-Find 把有遞移關係的配對合併成同一組——專門解決"
+                             "digiKam 自己把同一批重複檔案拆成好幾個參考組顯示的問題，"
+                             "跟自動分組的結果合併，不是取代")
     parser.add_argument("--write-labels", action="store_true",
                         help="把本次建議動作寫成 digiKam 色彩/揀選標籤（XMP metadata），"
                              "需要系統已安裝 exiftool（brew install exiftool）；寫入後要在"
                              "digiKam 裡對該資料夾「重新讀取中繼資料」才會顯示在縮圖畫面上，"
                              "細節見腳本開頭「digiKam 標籤整合」說明")
+    # 舊版參數，保留相容：現在檔名家族分組跟內建雜湊分組預設就會一起跑，
+    # 這兩個參數已經不影響行為，只是避免舊指令直接報錯。
+    parser.add_argument("--family", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--tier", choices=["exact", "similar"], default=None,
+                        help=argparse.SUPPRESS)
     args = parser.parse_args()
+
+    if args.family or args.tier:
+        print("ℹ️  --family / --tier 是舊版參數：現在檔名家族分組跟內建雜湊分組"
+              "預設就會一起跑，不需要再指定，這裡直接忽略。")
 
     print(f"掃描資料夾：{args.folder} ...")
     paths = list(find_images(args.folder))
@@ -1011,34 +1189,34 @@ def main():
         if i % 200 == 0:
             print(f"  已處理 {i}/{len(paths)} 張")
 
-    tier_label = "100%（完全相同）" if args.tier == "exact" else "50-90%（近似）"
+    source_desc = "檔名家族分組" + ("" if args.skip_hash else "＋內建雜湊分組")
+    if args.groups_csv:
+        source_desc += "＋外部分組 CSV"
     if args.pairs_csv:
-        print(f"依外部配對清單分組中（自動合併遞移關係）：{args.pairs_csv} ...")
-        groups = group_by_pairs_csv(features, args.pairs_csv)
-        tier_label = "外部配對（digiKam 匯出，已合併）"
-    elif args.groups_csv:
-        print(f"依外部分組清單分組中：{args.groups_csv} ...")
-        groups = group_by_csv(features, args.groups_csv)
-        tier_label = "外部分組（digiKam 匯出）"
-    elif args.family:
-        print("依「同資料夾＋檔名核心編號」分組中（不需要相似度搜尋）...")
-        groups = group_by_filename_family(features)
-        tier_label = "檔名家族分組"
-    else:
-        max_dist = args.exact_max_dist if args.tier == "exact" else args.similar_max_dist
-        print(f"依 {tier_label} 分級分組中（雜湊距離 <= {max_dist}）...")
-        groups = group_by_hash(features, max_dist)
+        source_desc += "＋外部配對 CSV"
+    print(f"分組中（{source_desc}，自動合併去重）...")
+    groups = combine_all_groups(
+        features,
+        skip_hash=args.skip_hash,
+        exact_max_dist=args.exact_max_dist,
+        similar_max_dist=args.similar_max_dist,
+        groups_csv=args.groups_csv,
+        pairs_csv=args.pairs_csv,
+        cross_folder=args.cross_folder,
+    )
     print(f"找到 {len(groups)} 組重複／近似照片")
 
     existing_status = load_existing_status(args.output)
 
     rows = []
-    for group in groups:
+    seen_paths = set()
+    for group, tier_label in groups:
         gid = group_key([f["path"] for f in group])
         decisions = decide_group(group, args.grayscale_sat, args.burst_seconds, args.near_tie_pct)
         for f in group:
             action, reason = decisions.get(f["path"], (ACTION_REVIEW, "未能判斷"))
             status = existing_status.get(f["path"], STATUS_UNCONFIRMED)
+            seen_paths.add(f["path"])
             rows.append({
                 **f,
                 "group_id": gid,
@@ -1049,7 +1227,12 @@ def main():
             })
 
     # 如果 --output 已存在，把「這次沒掃到、但上次還在清單裡」的列也留著
-    # （用讀舊檔的方式最單純：直接把舊的檢查清單列，凡本次未重新產生的路徑，原樣保留）
+    # （例如檔案已被搬走/刪除，或這次不再被判定為重複組的一部分）——
+    # 用讀舊檔的方式最單純：舊清單裡「這次沒有重新產生」的路徑，原樣保留。
+    # 2026-09-23 改版：以前這裡只保留「上次是別種相似度分級」的舊列（因為
+    # 以前一次只跑一種分組方式，其他分級的結果本來就不會在這次重新出現）；
+    # 現在每次都會自動跑齊所有分組方式，所以改成單純比對路徑有沒有出現在
+    # 這次結果裡，不再依賴相似度分級是否相同。
     if os.path.exists(args.output):
         try:
             wb_old = load_workbook(args.output)
@@ -1057,14 +1240,12 @@ def main():
                 ws_old = wb_old["檢查清單"]
                 headers = [c.value for c in next(ws_old.iter_rows(min_row=1, max_row=1))]
                 idx = {h: i for i, h in enumerate(headers)}
-                seen_paths = {r["path"] for r in rows}
                 for row in ws_old.iter_rows(min_row=2, values_only=True):
                     old_path = row[idx["檔案路徑"]]
-                    old_tier = row[idx.get("相似度分級", 2)]
-                    if old_path and old_path not in seen_paths and old_tier != tier_label:
+                    if old_path and old_path not in seen_paths:
                         rows.append({
                             "group_id": row[idx["群組ID"]],
-                            "tier_label": old_tier,
+                            "tier_label": row[idx.get("相似度分級", 2)],
                             "filename": row[idx["檔名"]],
                             "path": old_path,
                             "width": 0, "height": 0,
@@ -1086,7 +1267,7 @@ def main():
     new_unconfirmed = sum(1 for r in rows if r["status"] == STATUS_UNCONFIRMED)
     print("\n" + "=" * 50)
     print(f"完成！已寫入 {args.output}")
-    print(f"本次分級：{tier_label}，共 {len(groups)} 組、{len(paths)} 張圖片掃描")
+    print(f"本次分組來源：{source_desc}，共 {len(groups)} 組、{len(paths)} 張圖片掃描")
     print(f"目前清單中「尚未確認」的檔案數：{new_unconfirmed}")
     print("=" * 50)
 

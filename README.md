@@ -8,12 +8,12 @@ An AI-assisted, human-reviewed workflow for processing the born-digital archive 
 
 ## At a glance
 
-Figures as of November 2026, from directory counts of the archive's network drive and from the tools' own run logs.
+Figures from a full listing of the archive's network drive on 23 November 2026 and from the tools' own run logs. System files are `.DS_Store`, `._*`, `Thumbs.db` and similar.
 
 | | |
 |---|---|
-| Source folder (unprocessed) | 23,492 files, 1,044 folders, 395.7 GB |
-| Processed area | 11,944 files in 687 folders across 12 series, 69.4 GB (counts include system files) |
+| Source folder (unprocessed) | 22,155 files (23,492 with system files), 1,044 folders, 395.7 GB |
+| Processed area | 10,499 files (11,944 with system files) in 687 folders: 10 series and one unsorted folder, 69.4 GB |
 | Zine OCR database | 48 issues, 96 scanned sheets, about 520,000 characters |
 | Batch renaming, one series | 1,448 of 1,448 files renamed with zero errors; 9 ambiguous files routed to manual review |
 
@@ -108,12 +108,12 @@ Code: MIT. The archive's content, including the zine and the screenshots in `ass
 
 ## 數字一覽
 
-截至 2026 年 11 月，依 NAS 目錄統計與各工具的執行紀錄。
+依 2026 年 11 月 23 日 NAS 全樹清單與各工具的執行紀錄。系統檔指 `.DS_Store`、`._*`、`Thumbs.db` 等。
 
 | | |
 |---|---|
-| 原始來源（未整理） | 23,492 個檔案、1,044 個資料夾、395.7 GB |
-| 整理區 | 11,944 個檔案、687 個資料夾、12 個系列、69.4 GB（含系統檔） |
+| 原始來源（未整理） | 22,155 個檔案（含系統檔 23,492）、1,044 個資料夾、395.7 GB |
+| 整理區 | 10,499 個檔案（含系統檔 11,944）、687 個資料夾、10 個系列加 1 個待整理資料夾、69.4 GB |
 | 豆皮丸 OCR 資料庫 | 48 期、96 張掃描、約 52 萬字 |
 | 單一系列批次改名 | 1,448 個檔案全數改名、錯誤 0；9 個無法判斷的檔案轉人工複核 |
 

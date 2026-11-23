@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+runs/
+data/
+*.xlsx
+*.csv
+.video_fp_cache.json
+.DS_Store
+Thumbs.db

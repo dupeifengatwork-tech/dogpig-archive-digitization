@@ -37,12 +37,12 @@ pip3 install --upgrade python-docx
 
 === 使用方式 ===
 先確認出處抓得對不對（不會更動任何檔案）：
-python3 mark_duplicates.py "/Users/c-lab/Desktop/佩峰/要標註的資料夾" \
-    --database "/Users/c-lab/AI工具/merged.docx" --list-sources
+python3 mark_duplicates.py "/path/to/folder" \
+    --database "/path/to/merged.docx" --list-sources
 
 確認後正式跑：
-python3 mark_duplicates.py "/Users/c-lab/Desktop/佩峰/要標註的資料夾" \
-    --database "/Users/c-lab/AI工具/merged.docx"
+python3 mark_duplicates.py "/path/to/folder" \
+    --database "/path/to/merged.docx"
 
 參數：
   folder           要處理的資料夾（會自動往下搜尋所有子資料夾）

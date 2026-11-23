@@ -22,7 +22,7 @@
 授權後會在同資料夾產生 token.json，之後就不用再登入。
 
 === 使用方式 ===
-python batch_ocr_merge.py "/Users/c-lab/Desktop/佩峰/豆皮丸jpg檔(300小)" --output merged.docx
+python batch_ocr_merge.py "/path/to/folder" --output merged.docx
 
 參數：
   folder            要處理的圖片資料夾路徑（必填）

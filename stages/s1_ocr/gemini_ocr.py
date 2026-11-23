@@ -26,8 +26,8 @@ warnings.filterwarnings("ignore")
 
 # --------------------------------------------------
 API_KEY = os.environ.get("GEMINI_API_KEY")
-IMAGE_FOLDER = "/Users/c-lab/Desktop/佩峰/豆皮丸jpg檔(300小)"
-OUTPUT_FOLDER = "/Users/c-lab/AI工具"
+IMAGE_FOLDER = os.environ.get("DOGPIG_SCAN_FOLDER", "/path/to/zine-scans")
+OUTPUT_FOLDER = os.environ.get("DOGPIG_OUTPUT_FOLDER", "/path/to/output")
 OUTPUT_FILENAME = "豆皮丸辨識結果_merged.docx"
 MODEL_NAME = "gemini-2.5-flash-lite"
 # --------------------------------------------------

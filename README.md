@@ -63,7 +63,7 @@ Details: [docs/workflow.md](docs/workflow.md).
 - **Never guess.** Anything a rule cannot decide is marked for review rather than resolved by the tool.
 - **Every run leaves a record** that can be audited or rolled back (rename logs, name maps, checksums).
 
-More: [docs/safety-and-qa.md](docs/safety-and-qa.md) · [docs/naming-convention.md](docs/naming-convention.md)
+More: [docs/safety-and-qa.md](docs/safety-and-qa.md) · [docs/naming-convention.md](docs/naming-convention.md) · [docs/metadata-conventions.md](docs/metadata-conventions.md) (document type crosswalk) · [docs/duplicate-review.md](docs/duplicate-review.md) (one worked review pass)
 
 ## Repository layout
 
@@ -76,7 +76,7 @@ stages/
   s5_inventory/build_inventory.py      Stage 5
   s6_rename/namer_tool/                Stage 6b (Namer v1.0)
 legacy/                                retired tools, kept to show how the workflow evolved
-docs/                                  workflow, naming convention, safety and QA
+docs/                                  workflow, naming and metadata conventions, duplicate review, safety and QA
 assets/                                screenshots and the workflow diagram
 ```
 

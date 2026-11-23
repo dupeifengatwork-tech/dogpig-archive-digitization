@@ -42,12 +42,15 @@ A match is a run of at least 6 Chinese characters (`--min-match 6`) after normal
 ## Stage 3 · Image duplicates (`stages/s3_image_review/digikam_smart_review.py`)
 
 ```bash
-python digikam_smart_review.py <folder> --output duplicates.xlsx --family [--pairs-csv pairs.csv]
+python digikam_smart_review.py <folder> --output duplicates.xlsx [--pairs-csv pairs.csv] [--groups-csv groups.csv]
 ```
 
-- Groups by perceptual hash (`--hash-size 16`, `--exact-max-dist 3`, `--similar-max-dist 14`) and by filename family (`--family`).
-- digiKam's "Find Duplicates" is run by hand at three similarity bands (100%, 80–90%, 50–80%). Pairs a person confirms there are fed back with `--pairs-csv`; a union-find merge joins pairs that share a file into one group, because digiKam's similarity is not transitive.
+- Every run groups by filename family and by perceptual hash together (`--hash-size 16`, `--exact-max-dist 3`, `--similar-max-dist 14`) and merges the results without double-counting. Until 23 September 2026 these were separate modes, and forgetting the second run left groups out of the sheet; `--family` is still accepted but no longer needed.
+- Hash comparison stays within each folder by default, since one event's photos rarely appear in another event's folder; `--cross-folder` compares across folders and is much slower. `--skip-hash` runs filename families only.
+- digiKam's "Find Duplicates" is run by hand at three similarity bands (100%, 80–90%, 50–80%). Pairs a person confirms there are fed back with `--pairs-csv`; a union-find merge joins pairs that share a file into one group, because digiKam's similarity is not transitive. Groups exported from digiKam's database can be added with `--groups-csv`; both inputs are merged with the automatic groups, not substituted for them.
 - Keep rule, in order: an original over an edited copy; then higher resolution; then, within 3% (`--near-tie-pct 3`), the larger file; otherwise "needs review". Burst shots (`--burst-seconds 10`) are never suggested for deletion.
+- Re-running merges with the previous sheet by file path, so rows already marked confirmed, deleted or on hold keep their status.
+- `test_digikam_smart_review.py` (42 checks, synthetic images only) covers the keep rules, the burst and grayscale exceptions, group merging and the guarantee that no file is written beside a source photo. Run it after every change.
 
 ## Stage 4 · A/V derivatives (`stages/s4_av_review/video_edit_detect.py`)
 
@@ -98,9 +101,9 @@ Drafts the CMS import sheet from folder paths, filenames and the event register.
 
 A person reviews every flagged field before the sheet goes to QA.
 
-## Stage 8 · QA (in progress)
+## Stage 8 · QA (one pass run; reusable script in progress)
 
-Field-level checks with no changes to the sheet: spelling against a list of known typos, controlled terms against the dropdown sheet, start date before end date and blank end date for single-day events, category month vs. filename month, duration field vs. description, name–role pairs. Each finding has a cell reference, the original value, a reason and a suggested fix, in three classes: definite error, internal inconsistency, needs confirmation.
+Field-level checks with no changes to the sheet: spelling against a list of known typos, controlled terms against the dropdown sheet, start date before end date and blank end date for single-day events, category month vs. filename month, duration field vs. description, name–role pairs. Each finding has a cell reference, the original value, a reason and a suggested fix, in three classes: definite error, internal inconsistency, needs confirmation. Results of the first full pass are in [safety-and-qa.md](safety-and-qa.md).
 
 ## Stage 9 · Import
 

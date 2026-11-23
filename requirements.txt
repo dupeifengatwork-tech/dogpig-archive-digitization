@@ -1,0 +1,6 @@
+python-docx
+openpyxl
+pillow
+imagehash
+numpy
+google-genai

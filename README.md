@@ -6,6 +6,16 @@
 
 An AI-assisted, human-reviewed workflow for processing the born-digital archive of Dogpig Art Cafe (豆皮文藝咖啡館), an independent art space in Kaohsiung, Taiwan, active from 1999 to 2014. The work was done in September–October 2026 at Asia Art Archive's Taipei office, as the office's first large-scale born-digital processing project.
 
+<p align="center">
+  <img src="assets/01-source-scan.jpg" width="520" alt="A scanned event flyer from the café's zine, mixing text and images"><br>
+  <sub>Source material: an event flyer from the café's zine, with mixed vertical and horizontal text</sub>
+</p>
+
+<p align="center">
+  <img src="assets/02-archive-mixed-formats.png" width="520" alt="The raw archive folder with TIFF, legacy Word, Photoshop and video files mixed together"><br>
+  <sub>The archive as received: scans, legacy Word files, TIFF images and video side by side</sub>
+</p>
+
 ## At a glance
 
 Figures from a full listing of the archive's network drive on 23 November 2026 and from the tools' own run logs. System files are `.DS_Store`, `._*`, `Thumbs.db` and similar.
@@ -87,6 +97,11 @@ python stages/s4_av_review/video_edit_detect.py /path/to/folder --cache .video_f
 ## What I learned
 
 The workflow changed direction several times: from digiKam's built-in search, to local OCR with PaddleOCR, to Google Docs OCR, to the Gemini vision model; from whole-file video matching to excerpt detection; from marking duplicate passages by hand to a repeatable coverage score. Each time I tested the cheapest manual version first and automated only after the results held up. That is the same habit archival work asks for: understand the material and its limits before deciding how to process it.
+
+<p align="center">
+  <img src="assets/03-digikam-filename-only-search.png" width="520" alt="digiKam search matching only filenames, not text inside images"><br>
+  <sub>An early dead end: digiKam's search matched filenames, not the text inside the images, which led to the OCR route</sub>
+</p>
 
 ## Status and limitations
 

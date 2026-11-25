@@ -37,7 +37,7 @@ python coverage_compare.py <folder> --database merged.docx --output coverage.xls
 | Not published | below 5% |
 | Too short | 6 Chinese characters or fewer |
 
-A match is a run of at least 6 Chinese characters (`--min-match 6`) after normalising full-width and half-width punctuation and whitespace; an index map keeps positions tied to the original text. `.doc` and `.rtf` files are converted with macOS `textutil` first; on other systems they are reported as unreadable.
+A match is a run of at least 6 Chinese characters (`--min-match 6`) after stripping punctuation, whitespace, Latin letters and digits, so OCR punctuation differences do not count; an index map keeps positions tied to the original text. `.doc` and `.rtf` files are converted with macOS `textutil` first; on other systems they are reported as unreadable.
 
 ## Stage 3 · Image duplicates (`stages/s3_image_review/digikam_smart_review.py`)
 
@@ -95,7 +95,7 @@ The person reviews the full preview and types the confirmation phrase. Before re
 
 ## Stage 7 · CMS metadata draft (in progress)
 
-Drafts the CMS import sheet from folder paths, filenames and the event register. Field rules were derived from 625 records already catalogued by hand in another series: constant fields, media-folder IDs by file type, PDF page counts and video durations written into descriptions, dates from the event register (estimated = 0) with a fallback to the filename's year and month (estimated = 1). Fields that need someone to look at the content (title, description, content type, names) are drafted and flagged. Institution-specific IDs and the folder map are read from a profile file that is not published.
+Drafts the CMS import sheet from folder paths, filenames and the event register. Field rules were derived from 625 records already cataloged by hand in another series: constant fields, media-folder IDs by file type, PDF page counts and video durations written into descriptions, dates from the event register (estimated = 0) with a fallback to the filename's year and month (estimated = 1). Fields that need someone to look at the content (title, description, content type, names) are drafted and flagged. Institution-specific IDs and the folder map are read from a profile file that is not published.
 
 ## Gate C · Review flagged fields
 

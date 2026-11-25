@@ -1,15 +1,15 @@
 # Metadata conventions: document type crosswalk
 
-When a file is catalogued in the CMS, its document type decides three things: how the title is written, which content types it gets from the controlled list, and which roles link it to people and organisations. This table is the working convention used for the Dogpig collection, translated from the cataloguing team's Chinese notes.
+When a file is cataloged in the CMS, its document type decides three things: how the title is written, which content types it gets from the controlled list, and which roles link it to people and organizations. This table is the working convention used for the Dogpig collection, translated from the cataloging team's Chinese notes.
 
-Titles are bilingual: an English form followed by a Traditional Chinese form. `XXX` stands for a person or organisation, dates are written DD/MM/YYYY in English and YYYY年MM月DD日 in Chinese.
+Titles are bilingual: an English form followed by a Traditional Chinese form. `XXX` stands for a person or organization, dates are written DD/MM/YYYY in English and YYYY年MM月DD日 in Chinese.
 
-| Document type | Title pattern | Content types (controlled list) | Roles linked to people and organisations |
+| Document type | Title pattern | Content types (controlled list) | Roles linked to people and organizations |
 |---|---|---|---|
 | Official letter (公文) | `Official Letter from XXX to XXX, DD/MM/YYYY`; with an attachment: `Official Letter from XXX to XXX, with [attachment], DD/MM/YYYY` | Administrative paper; Correspondence; plus the attachment's own type | Author; Recipient |
 | Email (電郵) | `Email from XXX to XXX, DD/MM/YYYY` | Correspondence | Author; Recipient |
 | Letter (信件) | `Letter from XXX to XXX, DD/MM/YYYY` | Correspondence | Author; Recipient |
-| Proposal (計畫書) | Title as it appears on the document; for grants, `Grant Application` | Administrative paper; Proposal | Organiser (public body); Facilitator (organising body); Practitioner (individual or initiator); Affiliate (sponsor); for grants, Author (applicant) and Grantee |
+| Proposal (計畫書) | Title as it appears on the document; for grants, `Grant Application` | Administrative paper; Proposal | Organiser (public body); Facilitator (organizing body); Practitioner (individual or initiator); Affiliate (sponsor); for grants, Author (applicant) and Grantee |
 | Presentation (簡報) | Title as it appears on the document | Administrative paper; Proposal | Organiser; Author |
 | Final report (成果報告) | Title as it appears on the document (grant projects) | Administrative paper; Report | Organiser; Facilitator; Practitioner; Affiliate; Author (applicant) |
 | Interim report (中期報告) | Title as it appears on the document (grant projects) | Administrative paper; Report | Organiser; Facilitator; Practitioner; Affiliate; Author (applicant) |
@@ -32,9 +32,9 @@ Titles are bilingual: an English form followed by a Traditional Chinese form. `X
 
 ## How the crosswalk is used
 
-- **Controlled terms only.** Content types and roles come from the CMS dropdown lists. A document that fits no row is flagged for review instead of getting a new term.
+- **Controlled terms only.** Content types and roles come from the CMS dropdown lists, so role names such as Organiser keep the CMS's spelling. A document that fits no row is flagged for review instead of getting a new term.
 - **More than one content type is normal.** An official letter with a proposal attached gets Administrative paper, Correspondence and Proposal.
-- **Roles carry the relationships.** People and organisations are separate records in the CMS; the role on the link (Author, Recipient, Organiser, Interviewee) is what makes the record searchable by person.
+- **Roles carry the relationships.** People and organizations are separate records in the CMS; the role on the link (Author, Recipient, Organiser, Interviewee) is what makes the record searchable by person.
 - **The title pattern makes records sortable.** Letters and emails put sender, recipient and date in a fixed order, so a list of correspondence sorts and reads consistently.
 
 This crosswalk is what Stage 7 (CMS metadata draft) relies on to propose content types; titles and roles that depend on reading the document are left as flagged drafts for a person to complete.

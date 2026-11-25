@@ -1,6 +1,6 @@
 # Duplicate review: one worked example
 
-Tools propose; a person decides. This page shows how that worked on one review pass carried out on 30 September 2026; the flagged files came from two series, live music and theatre. Folder and file names are replaced with placeholders.
+Tools propose; a person decides. This page shows how that worked on one review pass carried out on 30 September 2026; the flagged files came from two series, live music and theater. Folder and file names are replaced with placeholders.
 
 ## What the review sheet records
 

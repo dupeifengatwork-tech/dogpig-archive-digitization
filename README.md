@@ -83,7 +83,7 @@ docs/                                  workflow, naming and metadata conventions
 assets/                                screenshots and the workflow diagram
 ```
 
-Stage 0, Stage 7, a reusable Stage 8 script and a command-line runner that chains the stages are in progress. Stage 8 has been run once on one series (see [docs/safety-and-qa.md](docs/safety-and-qa.md)).
+This repository is frozen at v1.0 as a record of the Dogpig project. Stages 0, 7 and 8 were carried out for this project but are not published as general scripts (see Status below).
 
 ## Quick start
 
@@ -108,8 +108,11 @@ The workflow changed direction several times: from digiKam's built-in search, to
 
 ## Status and limitations
 
-- The CMS metadata draft (Stage 7) has run as a dry run; it is not yet imported.
-- Stage 8 QA has run once on one series' import sheet; the script is tied to that workbook and is not published yet.
+**Frozen at v1.0 (November 2026).** This repository documents the Dogpig project and will not be extended. Development has moved to a separate internal tool that applies the same workflow to other collections at Asia Art Archive; it is not public because it holds institution-specific settings.
+
+- Stage 0 was done with directory listings for this project; no general script is published.
+- The CMS metadata draft (Stage 7) was run as a dry run; it relies on an unpublished institutional profile.
+- Stage 8 QA was run once on one series' import sheet; the script is tied to that workbook and is not published.
 - Audio fingerprinting is weak on silent clips or clips with only background music.
 - Converting legacy `.doc` files in Stage 2 relies on macOS `textutil`.
 
@@ -161,7 +164,7 @@ Code: MIT. The archive's content, including the zine and the screenshots in `ass
 10. **關卡 B**：完整預覽後輸入確認字句；執行前重新掃描，有任何變動就中止。
 11. **Stage 7 metadata 草稿**：從路徑、檔名、活動登記表推出 CMS 匯入表，需要判斷的欄位插旗。
 12. **關卡 C**：人工審閱插旗欄位。
-13. **Stage 8 QA**：逐欄檢查拼字、受控詞、日期順序、時長與描述是否一致。已對一個系列的匯入表跑過一輪（見 `docs/safety-and-qa.md`），通用腳本尚未公開。
+13. **Stage 8 QA**：逐欄檢查拼字、受控詞、日期順序、時長與描述是否一致。已對一個系列的匯入表跑過一輪（見 `docs/safety-and-qa.md`），腳本綁定該份匯入表，不公開。
 14. **Stage 9 匯入**：由工程師匯入 CMS（不在本 repo 範圍）。
 
 ## 設計原則
@@ -176,6 +179,10 @@ Code: MIT. The archive's content, including the zine and the screenshots in `ass
 流程轉向過好幾次：從 digiKam 內建搜尋、本地端 PaddleOCR、Google 文件 OCR，到 Gemini 多模態模型；影片從整檔比對到片段偵測；重複段落從人工標註到可重跑的覆蓋率分數。每次都先用成本最低的手動方式驗證，確認品質後才自動化。這也是檔案工作的習慣：先理解材料的特性與限制，再決定怎麼處理。
 
 舊版工具保留在 `legacy/`：`00_search_paddle.py`（本地端 PaddleOCR 關鍵字搜尋）、`01_batch_ocr_merge.py`（Google 文件 OCR）與 `03_mark_duplicates_new.py`（以刪除線標註重複段落），已由 Stage 1 與 Stage 2 取代。
+
+## 狀態
+
+本 repo 於 2026 年 11 月凍結為 v1.0，作為豆皮專案的紀錄，不再擴充。後續開發已轉為 AAA 內部工具，把同一套流程套用到其他 collection；因含機構設定，不公開。Stage 0、7、8 在本專案中已執行，但未公開為通用腳本。
 
 ## 授權
 

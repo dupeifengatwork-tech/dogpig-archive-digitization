@@ -39,7 +39,7 @@ A full pass on 30 October 2026 checked the same sheet against the mapping specif
 | Needs an outside source (names, paths) | 13 |
 | Other items awaiting review or import confirmation | 12 |
 
-The checking script compared the workbook with a saved extraction and stopped if anything had changed, and recorded the SHA-256 of both the workbook and the specification. It is tied to that one workbook, so it is not published here; Stage 8 will generalize it.
+The checking script compared the workbook with a saved extraction and stopped if anything had changed, and recorded the SHA-256 of both the workbook and the specification. It is tied to that one workbook, so it is not published here.
 
 ## Publishing this repository
 

@@ -50,8 +50,8 @@ Rules that came out of real folders:
 | S-10 | Rollback uses only the log, and only where the original name is still free. |
 | S-11 | The tool has no code path that deletes a file. |
 
-## Result on one series
+## Results
 
-One series of 1,654 previewed files: 1,448 renamed, 9 sent to review (7 with no determinable date, 2 needing conversion first), 197 skipped as system or attachment files. All 1,448 renames completed with no errors and passed verification.
+Two series have been renamed. The first (678 files) was renamed with the earlier planning script that Namer replaced, and the result was checked against a re-exported directory listing. The second was the first run of Namer v1.0: 1,654 previewed files, 1,448 renamed, 9 sent to review (7 with no determinable date, 2 needing conversion first), 197 skipped as system or attachment files. All 1,448 renames completed with no errors and passed verification.
 
 Namer has 33 unit and integration tests. Tests that used a real directory listing are being replaced with synthetic data before they are published.

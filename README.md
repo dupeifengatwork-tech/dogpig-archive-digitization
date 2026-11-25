@@ -1,10 +1,10 @@
-# Dogpig Art Cafe Archive Automation
+# Dogpig Art Café Archive Automation
 
-**AI-Assisted Born-digital Archive Processing, Asia Art Archive (Taipei)**
+**AI-Assisted Born-Digital Archive Processing, Asia Art Archive (Taipei)**
 
 > 中文說明請見下方〈中文版〉。
 
-An AI-assisted, human-reviewed workflow for processing the born-digital archive of Dogpig Art Cafe (豆皮文藝咖啡館), an independent art space in Kaohsiung, Taiwan, active from 1999 to 2014. The work was done in September–October 2026 at Asia Art Archive's Taipei office, as the office's first large-scale born-digital processing project.
+An AI-assisted, human-reviewed workflow for processing the born-digital archive of Dogpig Art Café (豆皮文藝咖啡館), an independent art space in Kaohsiung, Taiwan, active from 1999 to 2014. The work was done in September–October 2026 at Asia Art Archive's Taipei office, as the office's first large-scale born-digital processing project.
 
 <p align="center">
   <img src="assets/01-source-scan.jpg" width="520" alt="A scanned event flyer from the café's zine, mixing text and images"><br>
@@ -25,7 +25,10 @@ Figures from a full listing of the archive's network drive on 23 November 2026 a
 | Source folder (unprocessed) | 22,155 files (23,492 with system files), 1,044 folders, 395.7 GB |
 | Processed area | 10,499 files (11,944 with system files) in 687 folders: 10 series and one unsorted folder, 69.4 GB |
 | Zine OCR database | 48 issues, 96 scanned sheets, about 520,000 characters |
-| Batch renaming, one series | 1,448 of 1,448 files renamed with zero errors; 9 ambiguous files routed to manual review |
+| Batch renaming | 2,126 files in two series renamed with zero errors (678 and 1,448); files the rules could not decide were routed to manual review |
+| Format conversion | 168 legacy-format files in the same two series (62 and 106) converted with Baleen, each output verified and recorded with SHA-256 |
+| Duplicate review | One review pass of 48 flagged items across two series; see [docs/duplicate-review.md](docs/duplicate-review.md) |
+| Processing time | About five weeks (8 September to 12 October 2026), against an original estimate of two to three months |
 
 ## My role
 
@@ -131,7 +134,10 @@ Code: MIT. The archive's content, including the zine and the screenshots in `ass
 | 原始來源（未整理） | 22,155 個檔案（含系統檔 23,492）、1,044 個資料夾、395.7 GB |
 | 整理區 | 10,499 個檔案（含系統檔 11,944）、687 個資料夾、10 個系列加 1 個待整理資料夾、69.4 GB |
 | 豆皮丸 OCR 資料庫 | 48 期、96 張掃描、約 52 萬字 |
-| 單一系列批次改名 | 1,448 個檔案全數改名、錯誤 0；9 個無法判斷的檔案轉人工複核 |
+| 批次改名 | 兩個系列共 2,126 個檔案改名（678＋1,448），錯誤 0；規則判斷不了的檔案轉人工複核 |
+| 格式轉換 | 同兩個系列共 168 個舊格式檔案（62＋106）以 Baleen 轉檔，逐檔驗證並記錄 SHA-256 |
+| 重複複核 | 一輪 48 筆待複核項目，來自兩個系列；見 [docs/duplicate-review.md](docs/duplicate-review.md) |
+| 處理時間 | 約五週（2026 年 9 月 8 日至 10 月 12 日），原估計需二至三個月 |
 
 ## 我的角色
 

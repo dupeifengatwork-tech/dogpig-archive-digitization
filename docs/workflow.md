@@ -12,7 +12,7 @@ Conventions shared by every tool:
 
 ## Stage 0 · Snapshot (done by listing; no script published)
 
-For this project, every file under each series folder was listed (relative path, size, modified time, system-file flag) and summarised by file count, folder count, bytes and extension counts. The figures in the README come from such a listing of the whole drive on 23 November 2026.
+For this project, every file under each series folder was listed (relative path, size, modified time, system-file flag) and summarized by file count, folder count, bytes and extension counts. The figures in the README come from such a listing of the whole drive on 23 November 2026.
 
 ## Stage 1 · Zine OCR (`stages/s1_ocr/gemini_ocr.py`, complete)
 

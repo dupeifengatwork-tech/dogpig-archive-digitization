@@ -10,9 +10,9 @@ Conventions shared by every tool:
 - System files (`.DS_Store`, `._*`, `Thumbs.db`, `desktop.ini`) are skipped.
 - Anything a rule cannot decide is marked for review. Tools never guess.
 
-## Stage 0 · Snapshot (in progress)
+## Stage 0 · Snapshot (done by listing; no script published)
 
-List every file under a series folder: relative path, size, modified time, system-file flag. Produces `listing.csv` and a summary (file count, folder count, bytes, extension counts). Optional SHA-256 for later source-to-processed mapping.
+For this project, every file under each series folder was listed (relative path, size, modified time, system-file flag) and summarised by file count, folder count, bytes and extension counts. The figures in the README come from such a listing of the whole drive on 23 November 2026.
 
 ## Stage 1 · Zine OCR (`stages/s1_ocr/gemini_ocr.py`, complete)
 
@@ -93,7 +93,7 @@ python -m namer rollback <root> --log rename_log.csv --confirm "..."
 
 The person reviews the full preview and types the confirmation phrase. Before renaming, the tool rescans and compares every row with the approved preview; any difference aborts the run with no file changed.
 
-## Stage 7 · CMS metadata draft (in progress)
+## Stage 7 · CMS metadata draft (dry run; not published)
 
 Drafts the CMS import sheet from folder paths, filenames and the event register. Field rules were derived from 625 records already cataloged by hand in another series: constant fields, media-folder IDs by file type, PDF page counts and video durations written into descriptions, dates from the event register (estimated = 0) with a fallback to the filename's year and month (estimated = 1). Fields that need someone to look at the content (title, description, content type, names) are drafted and flagged. Institution-specific IDs and the folder map are read from a profile file that is not published.
 
@@ -101,7 +101,7 @@ Drafts the CMS import sheet from folder paths, filenames and the event register.
 
 A person reviews every flagged field before the sheet goes to QA.
 
-## Stage 8 · QA (one pass run; reusable script in progress)
+## Stage 8 · QA (one pass run; not published)
 
 Field-level checks with no changes to the sheet: spelling against a list of known typos, controlled terms against the dropdown sheet, start date before end date and blank end date for single-day events, category month vs. filename month, duration field vs. description, name–role pairs. Each finding has a cell reference, the original value, a reason and a suggested fix, in three classes: definite error, internal inconsistency, needs confirmation. Results of the first full pass are in [safety-and-qa.md](safety-and-qa.md).
 
